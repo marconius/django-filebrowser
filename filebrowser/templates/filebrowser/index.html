@@ -13,6 +13,10 @@
 <!-- JAVASCRIPTS -->
 {% block extrahead %}
     {{ block.super }}
+    <!-- Loading jquery doesn't seem to be necessary in original filebrowser templates 
+         (django.jQuery) used instead. Should figure this out eventually as it seems
+         cleaner. -->
+    <script type="text/javascript" src="{{ STATIC_URL }}filebrowser/js/jquery-1.7.js"></script>
     {% ifequal query.pop '1' %} <!-- FileBrowseField -->
     <script language="javascript" type="text/javascript" src="{{ settings_var.URL_FILEBROWSER_MEDIA }}js/FB_FileBrowseField.js"></script>
     {% endifequal %}
@@ -25,6 +29,38 @@
     <script language="javascript" type="text/javascript" src="{{ settings_var.URL_FILEBROWSER_MEDIA }}js/FB_CKEditor.js"></script>
     {% endifequal %}
     {{ media }}
+    <script type="text/javascript" charset="utf-8">
+        (function($) {
+            $(document).ready(function() {
+                $("a.pulldown-versions-handler").bind("click", function() {
+                    if (!$(this).parent().hasClass("open")) {
+                        $("tr").removeClass("selected");
+                        $(".pulldown-versions-container").removeClass("open");
+                        $(this).parent().addClass("open");
+                        $(this).parent().parent().parent().addClass("selected");
+                    } else {
+                        $(this).parent().removeClass("open");
+                        $(this).parent().parent().parent().removeClass("selected");
+                    }
+                });
+                $(document).keypress(function(evt) {
+                    if (evt.keyCode == '27') {
+                        $(".pulldown-versions-container:visible").removeClass("open");
+                        $(".pulldown-versions-container").parent().parent().removeClass("selected");
+                    }
+                });
+                $(document).mousedown(function(evt) {
+                    if ($(".pulldown-versions-container").is(":visible")) {
+                        var $target = $(evt.target);
+                        if (!$(evt.target).hasClass("pulldown-versions-container") && $target.parents(".pulldown-versions-container").length == 0) {
+                            $(".pulldown-versions-container").removeClass("open");
+                            $(".pulldown-versions-container").parent().parent().removeClass("selected");
+                        }
+                    }
+                });
+            });
+        })(jQuery.noConflict() );
+    </script>
     
     {% if not actions_on_top and not actions_on_bottom %}
     <style>
