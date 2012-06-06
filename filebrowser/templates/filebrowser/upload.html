@@ -1,37 +1,30 @@
 {% extends "admin/base_site.html" %}
 
 <!-- LOADING -->
-{% load i18n l10n adminmedia fb_tags %}
+{% load i18n adminmedia fb_tags %}
 
 <!-- STYLESHEETS -->
-{% block stylesheets %}
+{% block extrastyle %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/forms.css" />
-    <link rel="stylesheet" type="text/css" href="{{ settings_var.URL_FILEBROWSER_MEDIA }}css/filebrowser.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}filebrowser/css/filebrowser.css" />
 {% endblock %}
 
 <!-- JAVASCRIPTS -->
-{% block javascripts %}
+{% block extrahead %}
     {{ block.super }}
     <script type="text/javascript" src="../../jsi18n/"></script>
     <script type="text/javascript" src="{{ settings_var.URL_FILEBROWSER_MEDIA }}js/fileuploader.js"></script>
+    <script type="text/javascript" src="{% admin_media_prefix %}js/admin/CollapsedFieldsets.js"></script>
+    
+    <!-- Loading jquery doesn't seem to be necessary in original filebrowser templates 
+         (django.jQuery) used instead. Should figure this out eventually as it seems
+         cleaner. -->
+    <script type="text/javascript" src="{{ STATIC_URL }}filebrowser/js/jquery-1.7.js"></script>
+
+    <script type="text/javascript" src="{% admin_media_prefix %}js/core.js"></script>
+
     <script type="text/javascript">
-    (function($){
-        $(document).ready(function() {
-            $("div#content .collapse").grp_collapsible({
-                on_init: function(elem, options) {
-                    // open collapse (and all collapse parents) in case of errors
-                    if (elem.find("ul.errorlist").length > 0) {
-                        elem.removeClass("closed")
-                            .addClass("open");
-                        elem.parents(".collapse")
-                            .removeClass("closed")
-                            .addClass("open");
-                    }
-                }
-            });
-        });
-    })(django.jQuery);
     (function($){
         $(document).ready(function() {
             var uploader = new qq.FileUploader({
@@ -88,7 +81,7 @@
                 showMessage: function(message){ alert(message); }
             });
         });
-    })(django.jQuery);
+    })(jQuery.noConflict());
     </script>
 {% endblock %}
 
@@ -101,8 +94,8 @@
 
 <!-- CONTENT -->
 {% block content %}
-<div class="container-flexible">
-    <div class="form-container">
+<div id="content-main">
+    
         <form>
             <fieldset class="module aligned">
             <div class="row" id="file-uploader">
@@ -139,6 +132,6 @@
                 {% endif %}
             </fieldset>
         </form>
-    </div>
+    
 </div>
 {% endblock %}

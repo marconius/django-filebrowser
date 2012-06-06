@@ -4,14 +4,19 @@
 {% load i18n adminmedia fb_tags fb_pagination %}
 
 <!-- STYLESHEETS -->
-{% block stylesheets %}
+{% block extrastyle %}
     {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}admin/css/changelists.css" />
     <link rel="stylesheet" type="text/css" href="{{ settings_var.URL_FILEBROWSER_MEDIA }}css/filebrowser.css" />
 {% endblock %}
 
 <!-- JAVASCRIPTS -->
-{% block javascripts %}
+{% block extrahead %}
     {{ block.super }}
+    <!-- Loading jquery doesn't seem to be necessary in original filebrowser templates 
+         (django.jQuery) used instead. Should figure this out eventually as it seems
+         cleaner. -->
+    <script type="text/javascript" src="{{ STATIC_URL }}filebrowser/js/jquery-1.7.js"></script>
     {% ifequal query.pop '1' %} <!-- FileBrowseField -->
     <script language="javascript" type="text/javascript" src="{{ settings_var.URL_FILEBROWSER_MEDIA }}js/FB_FileBrowseField.js"></script>
     {% endifequal %}
@@ -24,14 +29,6 @@
     <script language="javascript" type="text/javascript" src="{{ settings_var.URL_FILEBROWSER_MEDIA }}js/FB_CKEditor.js"></script>
     {% endifequal %}
     {{ media }}
-    <script type="text/javascript" charset="utf-8">
-        (function($) {
-            $(document).ready(function() {
-                grappelli.initSearchbar();
-                grappelli.initFilter();
-            });
-        })(django.jQuery);
-    </script>
     <script type="text/javascript" charset="utf-8">
         (function($) {
             $(document).ready(function() {
@@ -62,62 +59,50 @@
                     }
                 });
             });
-        })(django.jQuery);
+        })(jQuery.noConflict() );
     </script>
+    
+    {% if not actions_on_top and not actions_on_bottom %}
+    <style>
+        #changelist table thead th:first-child { width: inherit; }
+    </style>
+    {% endif %}
 {% endblock %}
 
 <!-- COLTYPE/BODYCLASS -->
+{% block coltype %}flex{% endblock %}
 {% block bodyclass %}change-list filebrowser{% if query.pop %} popup{% endif %}{% endblock %}
-{% block content-class %}content-flexible{% endblock %}
 
 <!-- BREADCRUMBS -->
 {% block breadcrumbs %}{% include "filebrowser/include/breadcrumbs.html" %}{% endblock %}
 
-<!-- OBJECT-TOOLS -->
-{% block object-tools %}
-<ul class="tools">
-    <li><a href="{% url filebrowser:fb_createdir %}{% query_string '' 'p' %}">{% trans "New Folder" %}</a></li>
-    <li><a href="{% url filebrowser:fb_upload %}{% query_string '' 'p' %}" class="focus">{% trans "Upload" %}</a></li>
-</ul>
-{% endblock %}
-
 <!-- CONTENT -->
 {% block content %}
-    <div class="module changelist-filters">
-        <!-- PAGINATION -->
-        {% pagination %}
-        <!-- FILTERS -->
-        {% include "filebrowser/include/filter.html" %}
-        <!-- SEARCH -->
-        <div id="search" class="module search span-6">
-            <form id="changelist-search" action="." method="get">
-                <input type="text" size="40" name="q" value="{{ query.q }}" id="searchbar" />
-                {% if query.filter_type %}<input type="hidden" name="filter_type" value="{{ query.filter_type }}" />{% endif %}
-                {% if query.filter_date %}<input type="hidden" name="filter_date" value="{{ query.filter_date }}" />{% endif %}
-                {% if query.o %}<input type="hidden" name="o" value="{{ query.o }}" />{% endif %}
-                {% if query.ot %}<input type="hidden" name="ot" value="{{ query.ot }}" />{% endif %}
-                {% if query.pop %}<input type="hidden" name="pop" value="{{ query.pop }}" />{% endif %}
-                {% if query.type %}<input type="hidden" name="type" value="{{ query.type }}" />{% endif %}
-                {% if query.format %}<input type="hidden" name="format" value="{{ query.format }}" />{% endif %}
-                {% if query.dir %}<input type="hidden" name="dir" value="{{ query.dir|urlencode }}" />{% endif %}
-                <button class="search" type="submit" value="">&nbsp;</button>
-            </form>
-        </div>
-        <br clear="all" />
-    </div>
-    <div id="changelist" class="container-full">
-        <!-- RESULTS -->
-        {% if filelisting.results_current %}
-            <div class="module changelist-results">
-                <table cellspacing="0">
-                    {% include "filebrowser/include/tableheader.html" %}
-                    <tbody>
-                    {% include "filebrowser/include/filelisting.html" %}
-                    </tbody>
-                </table>
+<div id="content-main">
+    {% block object-tools %}
+    <ul class="object-tools">
+        <li><a href="{% url filebrowser:fb_createdir %}{% query_string '' 'p' %}">{% trans "New Folder" %}</a></li>
+        <li><a href="{% url filebrowser:fb_upload %}{% query_string '' 'p' %}" class="focus">{% trans "Upload" %}</a></li>
+    </ul>
+    {% endblock %}
+    <div class="module filtered" id="changelist">
+      {% include "filebrowser/include/toolbar.html" %}
+        <div class="changelist-content" style="display: inline; float:none;">
+            <div class="result-list-container">
+                <div class="result-list">
+                    <table cellspacing="0">
+                        {% include "filebrowser/include/tableheader.html" %}
+                        <tbody>
+                        {% include "filebrowser/include/filelisting.html" %}
+                        </tbody>
+                    </table>
+                </div>
+                {% pagination %}
             </div>
-        {% endif %}
-        <!-- PAGINATION -->
-        {% pagination %}
+        </div>
+        <div id="changelist-filter">
+            {% include "filebrowser/include/filter.html" %}
+        </div>
     </div>
+</div>
 {% endblock %}
