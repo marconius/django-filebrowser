@@ -1,3 +1,5 @@
+Smacker's fork is looking better at this point if you got Django 1.4 running. (https://github.com/smacker/django-filebrowser-no-grappelli-django14)
+
 Django FileBrowser
 ==================
 
